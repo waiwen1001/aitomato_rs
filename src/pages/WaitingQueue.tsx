@@ -1,52 +1,93 @@
 import { useNavigate } from "react-router-dom";
-import MainContainer from "../components/MainContainer"
+import MainContainer from "../components/MainContainer";
 import ConfirmationModal from "../components/ConfirmationModal";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
+import { useAppSelector } from "../hooks/redux";
 
 const WaitingQueue = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [time, setTime] = useState(new Date());
-  const queue = {"queue_no": "A002", "restaurant": "Restaurant A"}
+  const timerRef = useRef<HTMLParagraphElement | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const { queue } = useAppSelector((state) => state.queue);
+  const { data: outlet } = useAppSelector((state) => state.outlet);
+
+  if (!queue || !outlet) {
+    navigate("/");
+  }
 
   const showMenu = () => {
-    console.log("show menu")
-  }
+    console.log("show menu");
+  };
 
   const cancelQueue = () => {
     setIsModalOpen(true);
     console.log("cancel queue");
-  }
+  };
 
   const handleConfirm = () => {
     navigate("/");
-  }
+  };
+
+  const updateTimer = () => {
+    const now = new Date();
+    if (timerRef.current) {
+      timerRef.current.innerText = format(now, "yyyy MMM dd hh:mm a");
+    }
+  };
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
+    if (timerRef.current) {
+      updateTimer();
+    }
 
-    return () => clearInterval(interval);
+    intervalRef.current = setInterval(updateTimer, 1000);
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, []);
 
   return (
     <MainContainer hideBack={true}>
       <div className="p-3 h-full">
-        <div className="text-sm text-right font-mono">{ format(time, "yyyy MMM dd hh:mm a") }</div>
+        <div className="text-sm text-right font-mono">
+          <p ref={timerRef}></p>
+        </div>
         <div className="text-center py-3">
           <h3 className="text-3xl text-orange-500 font-semibold">Ai-Tomato</h3>
-          <h3 className="text-xl mt-2">{ queue.restaurant }</h3>
+          <h3 className="text-xl mt-2">{outlet?.restaurant.name}</h3>
         </div>
         <div className="mt-4 h-full">
           <div className="flex flex-col items-center justify-around border-dashed border-2 bg-sky-100 rounded-xl p-4 h-[40%]">
             <div className="text-sky-800 font-semibold">Queue Number</div>
             <div className="w-[30%] h-[2px] bg-gray-400 my-3"></div>
-            <div className="text-[70px] leading-none tracking-wider font-bold text-green-700">{ queue.queue_no }</div>
+            <div className="text-[70px] leading-none tracking-wider font-bold text-green-700">
+              {queue?.queueNumber}
+            </div>
             <div className="w-[30%] h-[2px] bg-gray-400 my-3"></div>
             <div className="text-sm">
-              <div>Estimated Wait Time : <span className="font-semibold">15 Minutes</span></div>
+              <div className="flex items-center gap-2">
+                <p className="text-xs">Estimated Wait Time :</p>
+                <span className="text-lg font-semibold">15 Minutes</span>
+              </div>
+              {queue?.phoneNumber && (
+                <div className="mt-1 flex items-center gap-2">
+                  <p className="text-xs">Phone:</p>
+                  <span className="text-lg font-semibold">
+                    {queue.phoneNumber}
+                  </span>
+                </div>
+              )}
+              <div className="mt-1 flex items-center gap-2">
+                <p className="text-xs">Pax:</p>
+                <span className="text-lg font-semibold">{queue?.pax}</span>
+              </div>
             </div>
           </div>
 
@@ -62,8 +103,18 @@ const WaitingQueue = () => {
           </div>
 
           <div className="w-full flex flex-col mt-6">
-            <button onClick={showMenu} className="p-2 rounded-md flex-1 bg-sky-700 text-white font-semibold">Browse Menu</button>
-            <button onClick={cancelQueue} className="text-sm mt-3 underline text-red-600 font-semibold">Cancel Queue</button>
+            <button
+              onClick={showMenu}
+              className="p-2 rounded-md flex-1 bg-sky-700 text-white font-semibold"
+            >
+              Browse Menu
+            </button>
+            <button
+              onClick={cancelQueue}
+              className="text-sm mt-3 underline text-red-600 font-semibold"
+            >
+              Cancel Queue
+            </button>
           </div>
         </div>
       </div>
@@ -78,7 +129,7 @@ const WaitingQueue = () => {
         cancelText="No, Go Back"
       />
     </MainContainer>
-  )
-}
+  );
+};
 
-export default WaitingQueue
+export default WaitingQueue;

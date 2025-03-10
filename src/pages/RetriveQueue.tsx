@@ -1,7 +1,5 @@
 const RetriveQueue = () => {
-  return (
-    <div>Retrive Queue</div>
-  )
-}
+  return <div>Retrive Queue</div>;
+};
 
-export default RetriveQueue
+export default RetriveQueue;

@@ -7,7 +7,7 @@ const FullLoading = () => {
         <AiOutlineLoading3Quarters size={60} />
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default FullLoading;

@@ -10,8 +10,15 @@ interface ConfirmModalProps {
   cancelText?: string;
 }
 
-const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirmText, cancelText}: ConfirmModalProps) => {
-
+const ConfirmationModal = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  title,
+  message,
+  confirmText,
+  cancelText,
+}: ConfirmModalProps) => {
   if (!isOpen) return null;
 
   return (
@@ -40,6 +47,6 @@ const ConfirmationModal = ({ isOpen, onClose, onConfirm, title, message, confirm
       </div>
     </div>
   );
-}
+};
 
-export default ConfirmationModal
+export default ConfirmationModal;
