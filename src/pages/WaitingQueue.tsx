@@ -4,19 +4,25 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { useAppSelector } from "../hooks/redux";
-
+import socketService from "../services/socketService";
 const WaitingQueue = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const timerRef = useRef<HTMLParagraphElement | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { queue } = useAppSelector((state) => state.queue);
+  const { queueInfo } = useAppSelector((state) => state.queue);
   const { data: outlet } = useAppSelector((state) => state.outlet);
 
-  if (!queue || !outlet) {
-    navigate("/");
-  }
+  useEffect(() => {
+    if (!queueInfo || !outlet) {
+      navigate("/");
+    }
+
+    if (queueInfo) {
+      socketService.joinQueue(queueInfo.queue.id);
+    }
+  }, [queueInfo, outlet, navigate]);
 
   const showMenu = () => {
     console.log("show menu");
@@ -53,6 +59,10 @@ const WaitingQueue = () => {
     };
   }, []);
 
+  if (!queueInfo || !outlet) {
+    return null;
+  }
+
   return (
     <MainContainer hideBack={true}>
       <div className="p-3 h-full">
@@ -68,7 +78,7 @@ const WaitingQueue = () => {
             <div className="text-sky-800 font-semibold">Queue Number</div>
             <div className="w-[30%] h-[2px] bg-gray-400 my-3"></div>
             <div className="text-[70px] leading-none tracking-wider font-bold text-green-700">
-              {queue?.queueNumber}
+              {queueInfo.queue.queueNumber}
             </div>
             <div className="w-[30%] h-[2px] bg-gray-400 my-3"></div>
             <div className="text-sm">
@@ -76,28 +86,34 @@ const WaitingQueue = () => {
                 <p className="text-xs">Estimated Wait Time :</p>
                 <span className="text-lg font-semibold">15 Minutes</span>
               </div>
-              {queue?.phoneNumber && (
+              {queueInfo.queue.phoneNumber && (
                 <div className="mt-1 flex items-center gap-2">
                   <p className="text-xs">Phone:</p>
                   <span className="text-lg font-semibold">
-                    {queue.phoneNumber}
+                    {queueInfo.queue.phoneNumber}
                   </span>
                 </div>
               )}
               <div className="mt-1 flex items-center gap-2">
                 <p className="text-xs">Pax:</p>
-                <span className="text-lg font-semibold">{queue?.pax}</span>
+                <span className="text-lg font-semibold">
+                  {queueInfo.queue.pax}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="flex mt-6">
             <div className="flex-1 flex flex-col items-center">
-              <div className="text-2xl font-semibold">A001</div>
+              <div className="text-2xl font-semibold">
+                {queueInfo.servingQueue}
+              </div>
               <div className="text-sm">Now Serving</div>
             </div>
             <div className="flex-1 flex flex-col items-center">
-              <div className="text-2xl font-semibold">0</div>
+              <div className="text-2xl font-semibold">
+                {queueInfo.aheadGroup}
+              </div>
               <div className="text-sm">Group Ahead</div>
             </div>
           </div>

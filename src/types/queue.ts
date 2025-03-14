@@ -10,6 +10,13 @@ export interface Queue {
   updatedAt: string;
 }
 
+export interface QueueInfo {
+  queue: Queue;
+  waitTime: number;
+  servingQueue: string;
+  aheadGroup: number;
+}
+
 export interface QueueGroup {
   group: string;
   lastQueueNumber: string;
@@ -18,7 +25,7 @@ export interface QueueGroup {
 
 export interface QueueState {
   data: Queue[] | null;
-  queue: Queue | null;
+  queueInfo: QueueInfo | null;
   loading: boolean;
   error: string | null;
 }
@@ -27,4 +34,18 @@ export interface QueueRequest {
   outletId: string | null;
   pax: number;
   phoneNumber: string;
+}
+
+export interface QueueResponse {
+  data: QueueInfo;
+  message: string;
+  success: boolean;
+}
+
+export enum QueueStatus {
+  PENDING = "PENDING",
+  PROCESSING = "PROCESSING",
+  CANCELLED = "CANCELLED",
+  COMPLETED = "COMPLETED",
+  TIMEOUT = "TIMEOUT",
 }

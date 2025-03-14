@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { QueueRequest, QueueState, Queue } from "../types/queue";
+import { QueueRequest, QueueState, QueueResponse } from "../types/queue";
 import { queueApi } from "../services/api";
 
 const initialState: QueueState = {
   data: [],
-  queue: null,
+  queueInfo: null,
   loading: false,
   error: null,
 };
@@ -37,20 +37,29 @@ const queueSlice = createSlice({
   name: "queue",
   initialState,
   reducers: {
-    setQueueData: (state, action: PayloadAction<Queue>) => {
-      if (state.data) {
-        const exists = state.data.some(
-          (queue) => queue.id === action.payload.id
-        );
-        if (!exists) {
-          state.data = [...state.data, action.payload];
+    setQueueData: (state, action: PayloadAction<QueueResponse>) => {
+      if (action.payload.data) {
+        if (state.data) {
+          const exists = state.data.some(
+            (queue) => queue.id === action.payload.data.queue.id
+          );
+          if (!exists) {
+            state.data = [...state.data, action.payload.data.queue];
+          } else {
+            // Update existing queue in the data array
+            state.data = state.data.map((queue) =>
+              queue.id === action.payload.data.queue.id
+                ? action.payload.data.queue
+                : queue
+            );
+          }
+        } else {
+          state.data = [action.payload.data.queue];
         }
-      } else {
-        state.data = [action.payload];
-      }
 
-      state.queue = action.payload;
-      localStorage.setItem("queueId", action.payload.id);
+        state.queueInfo = action.payload.data;
+        localStorage.setItem("queueId", action.payload.data.queue.id);
+      }
     },
   },
   extraReducers: (builder) => {
@@ -99,5 +108,4 @@ const queueSlice = createSlice({
   },
 });
 
-export const { setQueueData } = queueSlice.actions;
 export default queueSlice.reducer;

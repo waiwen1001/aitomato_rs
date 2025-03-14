@@ -1,14 +1,14 @@
 import { useState, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { AppDispatch, RootState } from "../store/store";
+import { useDispatch } from "react-redux";
+import { AppDispatch } from "../store/store";
 import MainContainer from "../components/MainContainer";
 import CurrentQueue from "../components/CurrentQueue";
 import FullLoading from "../components/FullLoading";
 import PaxInput from "../components/PaxInput";
 import { createQueue } from "../store/queueSlice";
-import { Queue } from "../types/queue";
 import { useAppSelector } from "../hooks/redux";
+import { QueueStatus } from "../types/queue";
 
 const TakeQueuePeople = () => {
   const maxPax = 6;
@@ -34,21 +34,21 @@ const TakeQueuePeople = () => {
 
       setLoading(true);
       try {
-        const result = (await dispatch(
+        const response = await dispatch(
           createQueue({
             outletId,
             pax,
             phoneNumber: phone,
           })
-        ).unwrap()) as Queue;
+        ).unwrap();
 
-        navigate("/waiting", {
-          state: {
-            phone,
-            pax,
-            queueData: result,
-          },
-        });
+        setLoading(false);
+        if (response.data.queue.status === QueueStatus.PROCESSING) {
+          navigate("/processing");
+          return;
+        }
+
+        navigate("/waiting");
       } catch (error) {
         console.error("Failed to create queue:", error);
         setLoading(false);

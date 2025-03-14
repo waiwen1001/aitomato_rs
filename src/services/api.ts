@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Outlet } from "../types/outlet";
-import { Queue, QueueRequest } from "../types/queue";
+import { Queue, QueueRequest, QueueResponse } from "../types/queue";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
 const API_PORT = import.meta.env.VITE_API_PORT || "3000";
@@ -22,16 +22,16 @@ export const queueApi = {
     outletId,
     pax,
     phoneNumber,
-  }: QueueRequest): Promise<Queue> => {
-    const response = await axios.post<Queue>(`${API_BASE_URL}/queues`, {
+  }: QueueRequest): Promise<QueueResponse> => {
+    const response = await axios.post<QueueResponse>(`${API_BASE_URL}/queues`, {
       outletId,
       pax,
       phoneNumber,
     });
     return response.data;
   },
-  getQueue: async (queueId: string): Promise<Queue> => {
-    const response = await axios.get<Queue>(
+  getQueue: async (queueId: string): Promise<QueueResponse> => {
+    const response = await axios.get<QueueResponse>(
       `${API_BASE_URL}/queues/pending/${queueId}`
     );
     return response.data;
