@@ -13,6 +13,7 @@ import WaitingQueue from "./pages/WaitingQueue.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import ProcessingQueue from "./pages/ProcessingQueue.tsx";
 import RootLayout from "./components/RootLayout";
+import Menu from "./pages/Menu.tsx";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
       {
         path: "processing",
         element: <ProcessingQueue />,
+      },
+      {
+        path: "menu",
+        element: <Menu />,
       },
       {
         path: "not-found",

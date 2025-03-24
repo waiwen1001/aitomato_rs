@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Outlet } from "../types/outlet";
+import { Category, Outlet } from "../types/outlet";
 import { Queue, QueueRequest, QueueResponse } from "../types/queue";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
@@ -33,6 +33,15 @@ export const queueApi = {
   getQueue: async (queueId: string): Promise<QueueResponse> => {
     const response = await axios.get<QueueResponse>(
       `${API_BASE_URL}/queues/pending/${queueId}`
+    );
+    return response.data;
+  },
+};
+
+export const menuApi = {
+  getMenu: async (outletId: string): Promise<Category[]> => {
+    const response = await axios.get<Category[]>(
+      `${API_BASE_URL}/outlets/${outletId}/menus`
     );
     return response.data;
   },

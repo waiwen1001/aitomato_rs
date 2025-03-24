@@ -25,7 +25,7 @@ const WaitingQueue = () => {
   }, [queueInfo, outlet, navigate]);
 
   const showMenu = () => {
-    console.log("show menu");
+    navigate("/menu");
   };
 
   const cancelQueue = () => {
