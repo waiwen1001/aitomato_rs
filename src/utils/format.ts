@@ -1,3 +1,8 @@
 export const formatPrice = (price: number): string => {
-  return `S$ ${price.toFixed(2)}`;
+  return new Intl.NumberFormat("en-SG", {
+    style: "currency",
+    currency: "SGD",
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(price);
 };

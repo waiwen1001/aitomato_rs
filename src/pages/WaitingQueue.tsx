@@ -4,7 +4,8 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import { useEffect, useState, useRef } from "react";
 import { format } from "date-fns";
 import { useAppSelector } from "../hooks/redux";
-import socketService from "../services/socketService";
+import { usePusher } from "../hooks/usePusher";
+import pusher from "../services/pusher";
 const WaitingQueue = () => {
   const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,10 +18,6 @@ const WaitingQueue = () => {
   useEffect(() => {
     if (!queueInfo || !outlet) {
       navigate("/");
-    }
-
-    if (queueInfo) {
-      socketService.joinQueue(queueInfo.queue.id);
     }
   }, [queueInfo, outlet, navigate]);
 
@@ -62,6 +59,14 @@ const WaitingQueue = () => {
   if (!queueInfo || !outlet) {
     return null;
   }
+
+  usePusher({
+    channelName: `queue-${queueInfo.queue.id}`,
+    eventName: "queue-updated",
+    callback: (data) => {
+      console.log(data);
+    },
+  });
 
   return (
     <MainContainer hideBack={true}>

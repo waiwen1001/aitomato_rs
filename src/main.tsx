@@ -3,6 +3,8 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "./index.css";
 
 import Welcome from "./pages/Welcome.tsx";
@@ -14,6 +16,7 @@ import NotFound from "./pages/NotFound.tsx";
 import ProcessingQueue from "./pages/ProcessingQueue.tsx";
 import RootLayout from "./components/RootLayout";
 import Menu from "./pages/Menu.tsx";
+import OrderSummary from "./pages/OrderSummary.tsx";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +53,10 @@ const router = createBrowserRouter([
         element: <Menu />,
       },
       {
+        path: "order-summary",
+        element: <OrderSummary />,
+      },
+      {
         path: "not-found",
         element: <NotFound />,
       },
@@ -61,6 +68,7 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <RouterProvider router={router} />
+      <ToastContainer />
     </Provider>
   </StrictMode>
 );

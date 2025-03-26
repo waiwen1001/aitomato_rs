@@ -25,6 +25,7 @@ export interface Menu {
   name: string;
   description: string;
   price: number;
+  thumbnail: string;
   images: MenuImage[];
 }
 
@@ -35,4 +36,27 @@ export interface Category {
   createdAt: Date;
   updatedAt: Date;
   menus: Menu[];
+}
+
+export interface TableState {
+  data: Table[] | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export interface Table {
+  id: string;
+  outletId: string;
+  floor: string;
+  type: string;
+  seq: number;
+  pax: number;
+  status: string;
+  merge: number[];
+  x_position: number;
+  y_position: number;
+  width: number;
+  height: number;
+  createdAt: Date;
+  updatedAt: Date;
 }

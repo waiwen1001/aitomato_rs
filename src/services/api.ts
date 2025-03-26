@@ -1,6 +1,7 @@
 import axios from "axios";
-import { Category, Outlet } from "../types/outlet";
+import { Category, Outlet, Table } from "../types/outlet";
 import { Queue, QueueRequest, QueueResponse } from "../types/queue";
+import { AddToCartRequest, OrderResponse } from "../types/order";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost";
 const API_PORT = import.meta.env.VITE_API_PORT || "3000";
@@ -42,6 +43,43 @@ export const menuApi = {
   getMenu: async (outletId: string): Promise<Category[]> => {
     const response = await axios.get<Category[]>(
       `${API_BASE_URL}/outlets/${outletId}/menus`
+    );
+    return response.data;
+  },
+};
+
+export const addToCartApi = {
+  addToCart: async ({
+    outletId,
+    queueId,
+    menuId,
+    quantity,
+    remark,
+  }: AddToCartRequest): Promise<OrderResponse> => {
+    const response = await axios.post<OrderResponse>(`${API_BASE_URL}/orders`, {
+      outletId,
+      queueId,
+      menuId,
+      quantity,
+      remark,
+    });
+    return response.data;
+  },
+};
+
+export const orderApi = {
+  fetchOrder: async (queueId: string): Promise<OrderResponse> => {
+    const response = await axios.get<OrderResponse>(
+      `${API_BASE_URL}/orders/${queueId}`
+    );
+    return response.data;
+  },
+};
+
+export const tableApi = {
+  getTables: async (outletId: string): Promise<Table[]> => {
+    const response = await axios.get<Table[]>(
+      `${API_BASE_URL}/tables/${outletId}`
     );
     return response.data;
   },
