@@ -1,30 +1,30 @@
 import { useEffect, useState } from "react";
 import MainContainer from "../components/MainContainer";
 import { useAppDispatch, useAppSelector } from "../hooks/redux";
-import { fetchTables } from "../store/tableSlice";
-import { Table } from "../types/outlet";
-import TableLayout from "../components/TableLayout";
+import { fetchLayouts } from "../store/layoutSlice";
+import { Layout } from "../types/outlet";
+import LayoutLandscape from "../components/LayoutLandscape";
 
 const ProcessingQueue = () => {
   const { queueInfo } = useAppSelector((state) => state.queue);
   const dispatch = useAppDispatch();
 
-  const [tables, setTables] = useState<Table[]>([]);
+  const [layouts, setLayouts] = useState<Layout[]>([]);
 
   useEffect(() => {
     if (queueInfo) {
-      getTables();
+      getLayouts();
     }
   }, [queueInfo]);
 
-  const getTables = async () => {
+  const getLayouts = async () => {
     try {
-      const tables = await dispatch(
-        fetchTables(queueInfo!.queue.outletId)
+      const layouts = await dispatch(
+        fetchLayouts(queueInfo!.queue.outletId)
       ).unwrap();
-      setTables(tables);
+      setLayouts(layouts);
     } catch (error) {
-      console.error("Failed to fetch tables:", error);
+      console.error("Failed to fetch layouts:", error);
     }
   };
 
@@ -34,7 +34,7 @@ const ProcessingQueue = () => {
 
   return (
     <MainContainer hideBack={true}>
-      <TableLayout tables={tables} />
+      <LayoutLandscape layouts={layouts} />
     </MainContainer>
   );
 };

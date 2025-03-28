@@ -1,7 +1,8 @@
+import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
 import { memo, useEffect, useRef, useState } from "react";
-import { Table } from "../types/outlet";
+import { Layout } from "../types/outlet";
 
-const TableLayout = ({ tables }: { tables: Table[] }) => {
+const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
@@ -15,7 +16,7 @@ const TableLayout = ({ tables }: { tables: Table[] }) => {
     setScale((prev) => Math.max(prev - 0.1, 0.5));
   };
 
-  const drawTables = () => {
+  const drawLayouts = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -31,17 +32,17 @@ const TableLayout = ({ tables }: { tables: Table[] }) => {
     ctx.scale(scale, scale);
 
     // Draw tables
-    tables.forEach((table) => {
-      if (table.type === "table") {
+    layouts.forEach((layout) => {
+      if (layout.type === "table") {
         ctx.beginPath();
         ctx.arc(
-          table.x_position + table.width / 2,
-          table.y_position + table.height / 2,
-          table.width / 2,
+          layout.x_position + layout.width / 2,
+          layout.y_position + layout.height / 2,
+          layout.width / 2,
           0,
           Math.PI * 2
         );
-        ctx.fillStyle = table.status === "available" ? "#22c55e" : "#ef4444";
+        ctx.fillStyle = layout.status === "available" ? "#22c55e" : "#ef4444";
         ctx.fill();
         ctx.strokeStyle = "#ffffff";
         ctx.stroke();
@@ -52,8 +53,8 @@ const TableLayout = ({ tables }: { tables: Table[] }) => {
   };
 
   useEffect(() => {
-    drawTables();
-  }, [tables, scale, offset]);
+    drawLayouts();
+  }, [layouts, scale, offset]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -80,15 +81,15 @@ const TableLayout = ({ tables }: { tables: Table[] }) => {
       <div className="absolute top-2 right-2 z-10 flex gap-2">
         <button
           onClick={handleZoomIn}
-          className="bg-white p-2 rounded-md shadow-md hover:bg-gray-100"
+          className="bg-white w-8 h-8 rounded-md flex items-center justify-center hover:bg-gray-300"
         >
-          +
+          <AiOutlinePlus />
         </button>
         <button
           onClick={handleZoomOut}
-          className="bg-white p-2 rounded-md shadow-md hover:bg-gray-100"
+          className="bg-white w-8 h-8 rounded-md flex items-center justify-center hover:bg-gray-300"
         >
-          -
+          <AiOutlineMinus />
         </button>
       </div>
       <div className="w-full h-full overflow-auto">
@@ -112,4 +113,4 @@ const TableLayout = ({ tables }: { tables: Table[] }) => {
   );
 };
 
-export default memo(TableLayout);
+export default memo(LayoutLandscape);

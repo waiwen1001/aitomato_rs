@@ -1,5 +1,5 @@
 import axios from "axios";
-import { Category, Outlet, Table } from "../types/outlet";
+import { Category, Outlet, Layout } from "../types/outlet";
 import { Queue, QueueRequest, QueueResponse } from "../types/queue";
 import { AddToCartRequest, OrderResponse } from "../types/order";
 
@@ -76,10 +76,10 @@ export const orderApi = {
   },
 };
 
-export const tableApi = {
-  getTables: async (outletId: string): Promise<Table[]> => {
-    const response = await axios.get<Table[]>(
-      `${API_BASE_URL}/tables/${outletId}`
+export const layoutApi = {
+  getLayout: async (outletId: string): Promise<Layout[]> => {
+    const response = await axios.get<Layout[]>(
+      `${API_BASE_URL}/layouts/${outletId}`
     );
     return response.data;
   },

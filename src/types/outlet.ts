@@ -38,13 +38,13 @@ export interface Category {
   menus: Menu[];
 }
 
-export interface TableState {
-  data: Table[] | null;
+export interface LayoutState {
+  data: Layout[] | null;
   loading: boolean;
   error: string | null;
 }
 
-export interface Table {
+export interface Layout {
   id: string;
   outletId: string;
   floor: string;
