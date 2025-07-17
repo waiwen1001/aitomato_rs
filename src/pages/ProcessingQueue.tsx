@@ -34,7 +34,7 @@ const ProcessingQueue = () => {
 
   return (
     <MainContainer hideBack={true}>
-      <LayoutLandscape layouts={layouts} />
+      <LayoutLandscape layouts={layouts} selectedLayout={queueInfo.queue.layoutId} />
     </MainContainer>
   );
 };

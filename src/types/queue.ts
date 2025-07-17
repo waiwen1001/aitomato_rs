@@ -1,6 +1,7 @@
 export interface Queue {
   id: string;
   outletId: string;
+  layoutId: string | null;
   pax: number;
   phoneNumber: string;
   queueNumber: string;

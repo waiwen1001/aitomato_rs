@@ -1,12 +1,14 @@
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState, useCallback } from "react";
 import { Layout } from "../types/outlet";
 
-const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
+const LayoutLandscape = ({ layouts, selectedLayout }: { layouts: Layout[], selectedLayout: string | null }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const highlightedLayoutIds = JSON.stringify(selectedLayout);
 
   const handleZoomIn = () => {
     setScale((prev) => Math.min(prev + 0.1, 2));
@@ -16,7 +18,7 @@ const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
     setScale((prev) => Math.max(prev - 0.1, 0.5));
   };
 
-  const drawLayouts = () => {
+  const drawLayouts = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -42,7 +44,17 @@ const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
           0,
           Math.PI * 2
         );
-        ctx.fillStyle = layout.status === "available" ? "#22c55e" : "#ef4444";
+        
+        // Check if this layout is highlighted
+        const isHighlighted = highlightedLayoutIds.includes(layout.id);
+        
+        // Set color based on highlight status and availability
+        if (isHighlighted) {
+          ctx.fillStyle = "#22c55e"; // Green for highlighted
+        } else {
+          ctx.fillStyle = layout.status === "available" ? "#22c55e" : "#ef4444";
+        }
+        
         ctx.fill();
         ctx.strokeStyle = "#ffffff";
         ctx.stroke();
@@ -50,34 +62,113 @@ const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
     });
 
     ctx.restore();
-  };
+  }, [layouts, scale, offset, highlightedLayoutIds]);
 
   useEffect(() => {
     drawLayouts();
-  }, [layouts, scale, offset]);
+  }, [drawLayouts]);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  // Set up touch event listeners with passive: false to allow preventDefault
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      setIsDragging(true);
+      setDragStart({
+        x: touch.clientX - offset.x,
+        y: touch.clientY - offset.y,
+      });
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      
+      const touch = e.touches[0];
+      const newOffset = {
+        x: touch.clientX - dragStart.x,
+        y: touch.clientY - dragStart.y,
+      };
+
+      // Add boundary constraints to prevent dragging too far
+      const maxOffset = 400;
+      const constrainedOffset = {
+        x: Math.max(-maxOffset, Math.min(maxOffset, newOffset.x)),
+        y: Math.max(-maxOffset, Math.min(maxOffset, newOffset.y)),
+      };
+
+      setOffset(constrainedOffset);
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+    };
+
+    // Add event listeners with passive: false
+    canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    canvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging, dragStart, offset]);
+
+  const getClientCoordinates = (e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e) {
+      return {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+      };
+    }
+    return {
+      x: e.clientX,
+      y: e.clientY,
+    };
+  };
+
+  const handleStart = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    const coords = getClientCoordinates(e);
     setIsDragging(true);
-    setOffset((prev) => ({
-      x: prev.x - e.clientX,
-      y: prev.y - e.clientY,
-    }));
-  };
+    setDragStart({
+      x: coords.x - offset.x,
+      y: coords.y - offset.y,
+    });
+  }, [offset]);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMove = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if (!isDragging) return;
-    setOffset((prev) => ({
-      x: prev.x + e.clientX,
-      y: prev.y + e.clientY,
-    }));
-  };
+    e.preventDefault();
+    
+    const coords = getClientCoordinates(e);
+    const newOffset = {
+      x: coords.x - dragStart.x,
+      y: coords.y - dragStart.y,
+    };
 
-  const handleMouseUp = () => {
+    // Add boundary constraints to prevent dragging too far
+    const maxOffset = 400;
+    const constrainedOffset = {
+      x: Math.max(-maxOffset, Math.min(maxOffset, newOffset.x)),
+      y: Math.max(-maxOffset, Math.min(maxOffset, newOffset.y)),
+    };
+
+    setOffset(constrainedOffset);
+  }, [isDragging, dragStart]);
+
+  const handleEnd = useCallback(() => {
     setIsDragging(false);
-  };
+  }, []);
 
   return (
-    <div className="relative w-full h-[400px] overflow-hidden">
+    <div className="flex-1 relative w-full h-[calc(100vh-4rem)] overflow-hidden">
       <div className="absolute top-2 right-2 z-10 flex gap-2">
         <button
           onClick={handleZoomIn}
@@ -92,22 +183,26 @@ const LayoutLandscape = ({ layouts }: { layouts: Layout[] }) => {
           <AiOutlineMinus />
         </button>
       </div>
-      <div className="w-full h-full overflow-auto">
-        <canvas
-          ref={canvasRef}
-          width={1200}
-          height={800}
-          className="bg-black cursor-grab active:cursor-grabbing"
-          style={{
-            display: "block",
-            minWidth: "100%",
-            minHeight: "100%",
-          }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
-        />
+      <div className="w-full h-full p-4 overflow-visible">
+        <div className="w-full h-full overflow-visible relative">
+          <canvas
+            ref={canvasRef}
+            width={1200}
+            height={800}
+            className="bg-black rounded-lg cursor-grab active:cursor-grabbing touch-none absolute inset-0 w-full h-full"
+            style={{
+              display: "block",
+              width: "100%",
+              height: "100%",
+              aspectRatio: "1200 / 800",
+              objectFit: "cover",
+            }}
+            onMouseDown={handleStart}
+            onMouseMove={handleMove}
+            onMouseUp={handleEnd}
+            onMouseLeave={handleEnd}
+          />
+        </div>
       </div>
     </div>
   );
